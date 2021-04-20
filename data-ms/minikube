@@ -1,0 +1,5 @@
+criar as images docker
+eval $(minikube docker-env)
+
+Virar localhost
+kubectl port-forward data-server 31000:31000

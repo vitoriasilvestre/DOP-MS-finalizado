@@ -1,0 +1,332 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: caos-data
+spec:
+  selector:
+    matchLabels:
+      run: caos-data
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: caos-data
+    spec:
+      containers:
+      - name: caos-data
+        image: andersonalmada/caos-data:latest
+        ports:
+        - containerPort: 31000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: caos-data
+  labels:
+    run: caos-data
+spec:
+  type: NodePort
+  ports:
+  - name: caos-data
+    nodePort: 31000
+    port: 31000
+    targetPort: 31000
+  selector:
+    run: caos-data
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: caos-discovery
+spec:
+  selector:
+    matchLabels:
+      run: caos-discovery
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: caos-discovery
+    spec:
+      containers:
+      - name: caos-discovery
+        image: andersonalmada/caos-discovery:latest
+        ports:
+        - containerPort: 31001
+          containerPort: 31002
+          containerPort: 31003
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: caos-discovery
+  labels:
+    run: caos-discovery
+spec:
+  type: NodePort
+  ports:
+  - name: discoveryrequest
+    nodePort: 31001
+    port: 31001
+    protocol: UDP
+    targetPort: 31001
+  - name: discoveryreceiv
+    nodePort: 31002
+    port: 31002
+    protocol: UDP
+    targetPort: 31002
+  - name: authenticationservice
+    nodePort: 31003
+    port: 31003
+    protocol: UDP
+    targetPort: 31003
+  selector:
+    run: caos-discovery
+---
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: caos-discovery
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: caos-discovery
+  minReplicas: 1
+  maxReplicas: 3
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      targetAverageUtilization: 80
+  - type: Resource
+    resource:
+      name: memory
+      targetAverageValue: 1000Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: caos-decision-tree
+spec:
+  selector:
+    matchLabels:
+      run: caos-decision-tree
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: caos-decision-tree
+    spec:
+      containers:
+      - name: caos-decision-tree
+        image: andersonalmada/caos-decision-tree:latest
+        ports:
+        - containerPort: 31005
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: caos-decision-tree
+  labels:
+    run: caos-decision-tree
+spec:
+  type: NodePort
+  ports:
+  - name: decision-tree
+    nodePort: 31005
+    port: 31005
+    protocol: UDP
+    targetPort: 31005
+  selector:
+    run: caos-decision-tree
+---
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: caos-decision-tree
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: caos-decision-tree
+  minReplicas: 1
+  maxReplicas: 3
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      targetAverageUtilization: 80
+  - type: Resource
+    resource:
+      name: memory
+      targetAverageValue: 1000Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: caos-monitoring
+spec:
+  selector:
+    matchLabels:
+      run: caos-monitoring
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: caos-monitoring
+    spec:
+      containers:
+      - name: caos-monitoring
+        image: andersonalmada/caos-monitoring:latest
+        ports:
+        - containerPort: 31006
+          containerPort: 31007
+          containerPort: 31008
+          containerPort: 31009
+          containerPort: 31010
+          containerPort: 31011
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: caos-monitoring
+  labels:
+    run: caos-monitoring
+spec:
+  type: NodePort
+  ports:
+  - name: throughputtcp
+    nodePort: 31006
+    port: 31006
+    protocol: TCP
+    targetPort: 31006
+  - name: throughputudp
+    nodePort: 31006
+    port: 31006
+    protocol: UDP
+    targetPort: 31006
+  - name: throughtcoap
+    nodePort: 31007
+    port: 31007
+    protocol: UDP
+    targetPort: 31007
+  - name: packetloss
+    nodePort: 31008
+    port: 31008
+    protocol: UDP
+    targetPort: 31008
+  - name: rtt
+    nodePort: 31009
+    port: 31009
+    protocol: UDP
+    targetPort: 31009
+  - name: sync
+    nodePort: 31010
+    port: 31010
+    protocol: UDP
+    targetPort: 31010
+  - name: profileoffloading
+    nodePort: 31011
+    port: 31011
+    protocol: UDP
+    targetPort: 31011
+  selector:
+    run: caos-monitoring
+---
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: caos-monitoring
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: caos-monitoring
+  minReplicas: 1
+  maxReplicas: 3
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      targetAverageUtilization: 80
+  - type: Resource
+    resource:
+      name: memory
+      targetAverageValue: 1000Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: caos-offloading-vm
+spec:
+  selector:
+    matchLabels:
+      run: caos-offloading-vm
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: caos-offloading-vm
+    spec:
+      containers:
+      - name: caos-offloading-vm
+        image: andersonalmada/caos-offloading-vm:latest
+        resources:
+          limits:
+            cpu: "2"
+            memory: "2G"
+          requests:
+            cpu: "2"
+            memory: "2G"
+        securityContext:
+          privileged: true
+        ports:
+        - containerPort: 31004
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: caos-offloading-vm
+  labels:
+    run: caos-offloading-vm
+spec:
+  type: NodePort
+  ports:
+  - name: offloading
+    nodePort: 31004
+    port: 31004
+    protocol: UDP
+    targetPort: 31004
+  - name: offloadingtcp
+    nodePort: 31004
+    port: 31004
+    protocol: TCP
+  - name: offloadingvm
+    nodePort: 31013
+    port: 31013
+    protocol: TCP
+  selector:
+    run: caos-offloading-vm
+---
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: caos-offloading-vm
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: caos-offloading-vm
+  minReplicas: 1
+  maxReplicas: 1
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      targetAverageUtilization: 80
+  - type: Resource
+    resource:
+      name: memory
+      targetAverageValue: 80

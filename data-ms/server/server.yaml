@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: data-server
+spec:
+  selector:
+    matchLabels:
+      run: data-server
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: data-server
+    spec:
+      containers:
+      - name: data-server
+        image: data-server:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 31001
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: data-server
+  labels:
+    run: data-server
+spec:
+  type: NodePort
+  ports:
+  - name: data-server
+    nodePort: 31001
+    port: 31001
+    targetPort: 31001
+  selector:
+    run: data-server
+---

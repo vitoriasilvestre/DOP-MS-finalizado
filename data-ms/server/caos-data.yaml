@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: caos-data
+spec:
+  selector:
+    matchLabels:
+      run: caos-data
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: caos-data
+    spec:
+      containers:
+      - name: caos-data
+        image: andersonalmada/caos-data:latest
+        ports:
+        - containerPort: 31000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: caos-data
+  labels:
+    run: caos-data
+spec:
+  type: NodePort
+  ports:
+  - name: caos-data
+    nodePort: 31000
+    port: 31000
+    targetPort: 31000
+  selector:
+    run: caos-data
+---

@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: data-server
+spec:
+  selector:
+    matchLabels:
+      run: data-server
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: data-server
+    spec:
+      containers:
+      - name: data-server
+        image: andersonalmada/data-server:latest
+        ports:
+        - containerPort: 31000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: data-server
+  labels:
+    run: data-server
+spec:
+  type: NodePort
+  ports:
+  - name: data-server
+    nodePort: 31000
+    port: 31000
+    targetPort: 31000
+  selector:
+    run: data-server
+---
